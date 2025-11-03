@@ -291,13 +291,13 @@ export default function Home() {
                   hoverable
                   onClick={() => handleCategoryClick(category.id)}
                   style={{ 
+                    body: { padding: '16px 8px' },
                     textAlign: 'center',
                     cursor: 'pointer',
                     border: isSelected ? '2px solid #1890ff' : '1px solid #d9d9d9',
                     backgroundColor: isSelected ? '#e6f7ff' : 'white',
                     transition: 'all 0.3s'
                   }}
-                  bodyStyle={{ padding: '16px 8px' }}
                 >
                   <div style={{ fontSize: 32, marginBottom: 8 }}>
                     {category.id === 'celulares' && '📱'}

@@ -120,9 +120,9 @@ export default function Home() {
             marginBottom: 32,
             borderRadius: 16,
             border: 'none',
-            overflow: 'hidden'
+            overflow: 'hidden',
+            padding: 32
           }}
-          bodyStyle={{ padding: 32 }}
         >
           <Row gutter={32} align="middle">
             <Col xs={24} md={12}>
@@ -212,9 +212,9 @@ export default function Home() {
                     border: isSelected ? '2px solid #1890ff' : '1px solid #d9d9d9',
                     backgroundColor: isSelected ? '#e6f7ff' : 'white',
                     transition: 'all 0.3s ease',
-                    transform: isSelected ? 'scale(1.05)' : 'scale(1)'
+                    transform: isSelected ? 'scale(1.05)' : 'scale(1)',
+                    padding: '24px 16px'
                   }}
-                  bodyStyle={{ padding: '24px 16px' }}
                 >
                   <div style={{ fontSize: 32, marginBottom: 8 }}>
                     {/* Iconos por categoría */}
@@ -243,8 +243,7 @@ export default function Home() {
       {/* PAUTA 2.4: Barra de búsqueda convencional */}
       {/* PAUTA 3.12: Mecanismos de filtrado/búsqueda */}
       <Card 
-        style={{ marginBottom: 24, borderRadius: 12 }}
-        bodyStyle={{ padding: 24 }}
+        style={{ marginBottom: 24, borderRadius: 12, body: { padding: '16px 8px' } }}
       >
         <Title level={4} style={{ marginBottom: 24 }}>
           Encuentra tu producto
@@ -422,9 +421,9 @@ export default function Home() {
                 style={{ 
                   height: '100%',
                   borderRadius: 12,
-                  border: '1px solid #f0f0f0'
+                  border: '1px solid #f0f0f0',
+                  body: { padding: '16px 8px' },
                 }}
-                bodyStyle={{ padding: 16 }}
               >
                 {/* PAUTA 3.10: Limitar información clave (1-5 propiedades) */}
                 {/* PAUTA 1.6: Jerarquía de textos */}

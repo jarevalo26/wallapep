@@ -68,25 +68,13 @@ export default function App({ Component, pageProps }) {
 
     let disconnect = async (e) => {
         e.preventDefault();
-        let response = await fetch(
-            process.env.NEXT_PUBLIC_BACKEND_BASE_URL +"/users/disconnect",
-            {
-                method: "GET",
-                headers: {
-                    "apikey": localStorage.getItem("apiKey")
-                }
-            });
 
         localStorage.removeItem("apiKey");
+        localStorage.removeItem("email");
+        localStorage.removeItem("userId"); 
         setLogin(false)
         router.push("/login")
     }
-
-
-  let callBackOnFinishLogin = (loginUser) => {
-    console.log("Cambiado "+loginUser.email);
-    console.log("Cambiado "+loginUser.password);
-  }
 
   let { Header, Content, Footer } = Layout;
 
@@ -119,7 +107,8 @@ export default function App({ Component, pageProps }) {
                         { key:"logo",  label: <img src="/logo.png" width="40" height="40" />},
                         { key:"menuProducts",  label: <Link href="/products">Products</Link>},
                         { key:"menuCreateProduct",  label: <Link href="/createProduct">Sell</Link>},
-                        { key:"menuMyProduct", label: <Link href="/myProducts">My Products</Link> },
+                        { key:"menuMyProduct", label: <Link href="/myProducts">My Products</Link> },                       
+                        { key:"menuTransactions", label: <Link href="/myTransactions">Transactions</Link> },
                         { key:"menuDisonnect",  label: <Link href="#" 
                             onClick={ (e) => { disconnect(e)} } >Disconnect</Link>},
                     ]} >
