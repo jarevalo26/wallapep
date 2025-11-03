@@ -1,6 +1,6 @@
 import CreateProductComponent from "./components/products/CreateProductComponent";
 
-export default function LoginPage({setLogin, openNotification}) {
+export default function CreateProductPage({setLogin, openNotification}) {
 
   return (
     <div>

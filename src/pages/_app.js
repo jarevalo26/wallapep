@@ -2,7 +2,7 @@ import "@/styles/globals.css";
 import Link from "next/link";
 import 'antd/dist/reset.css';
 import { Layout, Menu, Avatar, Typography, Col, Row, notification } from 'antd';
-import { FireOutlined , LoginOutlined } from '@ant-design/icons';
+import { LoginOutlined } from '@ant-design/icons';
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { usePathname } from "next/navigation";
