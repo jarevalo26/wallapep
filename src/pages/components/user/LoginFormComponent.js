@@ -41,7 +41,7 @@ let LoginFormComponent = ({setLogin, openNotification}) => {
             console.log("ok "+responseBody)
             setLogin(true)
             openNotification("top", "Login successfull", "success")
-            router.push("/products");
+            router.push("/");
         } else {
             let responseBody = await response.json();
             let serverErrors = responseBody.errors;

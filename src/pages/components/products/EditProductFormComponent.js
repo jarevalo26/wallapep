@@ -1,5 +1,5 @@
 import {useState, useEffect } from "react";
-import { Card, Input, Button, Row, Col, Form, Typography, DatePicker } from "antd";
+import { Card, Input, Button, Row, Col, Form, DatePicker } from "antd";
 import {modifyStateProperty} from "../../../utils/UtilsState";
 import {timestampToDate, dateFormatTemplate } from "../../../utils/UtilsDates";
 

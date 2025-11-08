@@ -73,7 +73,7 @@ export default function App({ Component, pageProps }) {
         localStorage.removeItem("email");
         localStorage.removeItem("userId"); 
         setLogin(false)
-        router.push("/login")
+        router.push("/")
     }
 
   let { Header, Content, Footer } = Layout;
@@ -96,7 +96,11 @@ export default function App({ Component, pageProps }) {
                 <Col xs= {18} sm={19} md={20} lg={21} xl = {22}>
                 {!login &&
                     <Menu theme="dark" mode="horizontal" items={ [
-                        { key:"logo",  label: <img src="/logo.png" width="40" height="40" />},
+                        { key:"logo",  label: (
+                            <Link href="/">
+                                <img src="/logo.png" width="40" height="40" alt="Logo" />
+                            </Link>
+                            )},
                         { key:"menuLogin",  icon: <LoginOutlined/>, label: <Link href="/login">Login</Link>},
                         { key:"menuRegister",  label: <Link href="/register">Register</Link>},
                     ]} >
@@ -104,7 +108,11 @@ export default function App({ Component, pageProps }) {
                 }
                 {login &&
                     <Menu theme="dark" mode="horizontal" items={ [
-                        { key:"logo",  label: <img src="/logo.png" width="40" height="40" />},
+                        { key:"logo",  label: (
+                            <Link href="/">
+                                <img src="/logo.png" width="40" height="40" alt="Logo" />
+                            </Link>
+                            )},
                         { key:"menuProducts",  label: <Link href="/products">Products</Link>},
                         { key:"menuCreateProduct",  label: <Link href="/createProduct">Sell</Link>},
                         { key:"menuMyProduct", label: <Link href="/myProducts">My Products</Link> },                       

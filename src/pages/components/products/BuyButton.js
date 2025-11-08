@@ -3,48 +3,46 @@ import { Button, Modal, message } from 'antd';
 import { ShoppingCartOutlined } from '@ant-design/icons';
 import { useRouter } from 'next/router';
 
-export default function BuyButton({ product, currentUserId, onSuccess }) {
-  const [isModalVisible, setIsModalVisible] = useState(false);
+export default function BuyButton({ product, currentUserId, onSuccess, openNotification }) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  // Verificar si el usuario puede comprar este producto
+  // Verificar si el usuario puede comprar
   const canBuy = () => {
-    // Usuario no logueado
     if (!currentUserId) {
       return { can: false, reason: 'login' };
     }
-
-    // Producto ya vendido
-    if (product.sold) {
+    if (product.buyerId !== null && product.buyerId !== undefined) {
       return { can: false, reason: 'sold' };
     }
-
-    // Es mi propio producto
-    if (product.userId === currentUserId) {
+    if (product.sellerId === currentUserId) {
       return { can: false, reason: 'own' };
     }
-
     return { can: true };
   };
 
   const checkResult = canBuy();
 
-  // Manejar clic en el botón
-  const handleBuyClick = () => {
+  // Abrir modal
+  const showModal = () => {
     if (!checkResult.can) {
       if (checkResult.reason === 'login') {
         message.warning('Debes iniciar sesión para comprar');
         router.push('/login');
-        return;
       }
       return;
     }
-    setIsModalVisible(true);
+    setIsModalOpen(true);
+  };
+
+  // Cerrar modal
+  const handleCancel = () => {
+    setIsModalOpen(false);
   };
 
   // Confirmar compra
-  const handleConfirmPurchase = async () => {
+  const handleOk = async () => {
     setLoading(true);
 
     try {
@@ -58,107 +56,41 @@ export default function BuyButton({ product, currentUserId, onSuccess }) {
           },
           body: JSON.stringify({
             productId: product.id,
-            buyerPaymentId: null // Por ahora siempre null
+            buyerPaymentId: null
           })
         }
       );
 
       if (response.ok) {
         const transaction = await response.json();
-        setIsModalVisible(false);
-        
-        // Mostrar modal de éxito
-        Modal.success({
-          title: '¡Compra exitosa!',
-          content: (
-            <div>
-              <p>Has comprado: <strong>{product.title}</strong></p>
-              <p>Precio: <strong>€{product.price}</strong></p>
-              <p>El vendedor ha sido notificado de tu compra.</p>
-            </div>
-          ),
-          okText: 'Ver mis compras',
-          cancelText: 'Cerrar',
-          onOk: () => {
-            router.push('/myTransactions');
-          },
-          okCancel: true
-        });
-
-        // Callback para actualizar el producto en la página padre
+        setIsModalOpen(false);
         if (onSuccess) {
           onSuccess(transaction);
         }
-
       } else {
-        // Manejar errores del backend
         const errorData = await response.json();
-        
-        if (errorData.errors && errorData.errors.length > 0) {
-          const error = errorData.errors[0];
-          
-          switch (error.code) {
-            case 404:
-              message.error('Producto no encontrado');
-              break;
-            case 400:
-              message.error(error.msg || 'No se pudo realizar la compra');
-              break;
-            case 401:
-              message.error('Debes iniciar sesión');
-              router.push('/login');
-              break;
-            default:
-              message.error('Error al realizar la compra. Intenta de nuevo.');
-          }
-        } else {
-          message.error('Error al realizar la compra');
-        }
+        message.error(errorData.errors?.[0]?.msg || 'Error al realizar la compra');
       }
-
     } catch (error) {
-      console.error('Error:', error);
-      message.error('Error de conexión. Intenta de nuevo.');
+      message.error('Error de conexión');
     } finally {
       setLoading(false);
     }
   };
 
-  // Cancelar compra
-  const handleCancel = () => {
-    setIsModalVisible(false);
-  };
-
-  // Determinar el estado del botón y su texto
+  // Determinar props del botón
   const getButtonProps = () => {
     if (!checkResult.can) {
       switch (checkResult.reason) {
         case 'login':
-          return {
-            disabled: false,
-            text: 'Iniciar sesión para comprar',
-            icon: <ShoppingCartOutlined />
-          };
+          return { disabled: false, text: 'Iniciar sesión para comprar' };
         case 'sold':
-          return {
-            disabled: true,
-            text: 'Producto vendido',
-            icon: null
-          };
+          return { disabled: true, text: 'Producto vendido' };
         case 'own':
-          return {
-            disabled: true,
-            text: 'No puedes comprar tu propio producto',
-            icon: null
-          };
+          return { disabled: true, text: 'No puedes comprar tu propio producto' };
       }
     }
-
-    return {
-      disabled: false,
-      text: 'Comprar ahora',
-      icon: <ShoppingCartOutlined />
-    };
+    return { disabled: false, text: 'Comprar ahora' };
   };
 
   const buttonProps = getButtonProps();
@@ -169,9 +101,9 @@ export default function BuyButton({ product, currentUserId, onSuccess }) {
         type="primary"
         size="large"
         block
-        icon={buttonProps.icon}
+        icon={<ShoppingCartOutlined />}
         disabled={buttonProps.disabled}
-        onClick={handleBuyClick}
+        onClick={showModal}
         style={{ marginTop: 16 }}
       >
         {buttonProps.text}
@@ -179,31 +111,21 @@ export default function BuyButton({ product, currentUserId, onSuccess }) {
 
       <Modal
         title="Confirmar compra"
-        open={isModalVisible}
-        onOk={handleConfirmPurchase}
+        open={isModalOpen}
+        onOk={handleOk}
         onCancel={handleCancel}
         okText="Confirmar compra"
         cancelText="Cancelar"
         confirmLoading={loading}
       >
-        <div style={{ padding: '20px 0' }}>
-          <p><strong>Producto:</strong> {product.title}</p>
-          <p><strong>Precio:</strong> €{product.price}</p>
-          {product.description && (
-            <p><strong>Descripción:</strong> {product.description}</p>
-          )}
-          
-          <div style={{ 
-            marginTop: 24, 
-            padding: 16, 
-            backgroundColor: '#f0f0f0', 
-            borderRadius: 8 
-          }}>
-            <p style={{ margin: 0, fontSize: 14 }}>
-              ¿Estás seguro de que quieres comprar este producto?
-            </p>
-          </div>
-        </div>
+        <p><strong>Producto:</strong> {product.title}</p>
+        <p><strong>Precio:</strong> €{product.price}</p>
+        {product.description && (
+          <p><strong>Descripción:</strong> {product.description}</p>
+        )}
+        <p style={{ marginTop: 16, color: '#666' }}>
+          ¿Estás seguro de que quieres comprar este producto?
+        </p>
       </Modal>
     </>
   );

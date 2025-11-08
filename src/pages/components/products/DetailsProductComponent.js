@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
-import { Typography, Card, Descriptions, Image, Row, Col, Tag, Divider } from 'antd';
-import BuyButton from './BuyButton'; // Ajusta la ruta según dónde lo guardes
+import { Typography, Card, Descriptions, Image, Row, Col, Tag, Divider, Button } from 'antd';
+import BuyButton from './BuyButton'; 
+import { UserOutlined } from '@ant-design/icons'; 
+import Link from 'next/link';
 
 const { Title, Text } = Typography;
 
@@ -131,13 +133,13 @@ let DetailsProductComponent = ({ id }) => {
                         </Title>
 
                         {/* Estado del producto */}
-                        {product.sold && (
+                        {product.buyerId && (
                             <Tag color="red" style={{ marginBottom: 16, fontSize: 14, padding: '4px 12px' }}>
                                 VENDIDO
                             </Tag>
                         )}
 
-                        {!product.sold && product.price < 100 && (
+                        {!product.buyerId && product.price < 100 && (
                             <Tag color="green" style={{ marginBottom: 16, fontSize: 14, padding: '4px 12px' }}>
                                 ¡OFERTA!
                             </Tag>
@@ -159,9 +161,14 @@ let DetailsProductComponent = ({ id }) => {
                                 <Text type="secondary">#{product.id}</Text>
                             </Descriptions.Item>
 
-                            {product.userId && (
+                            {product.sellerId && (
                                 <Descriptions.Item label="Vendedor">
-                                    <Text>Usuario #{product.userId}</Text>
+                                    {/* <Text>Usuario #{product.sellerId}</Text> */}
+                                    <Link href={`/profile/${product.sellerId}`}>
+                                        <Button type="link" icon={<UserOutlined />}>
+                                            Usuario #{product.sellerId}
+                                        </Button>
+                                    </Link>
                                 </Descriptions.Item>
                             )}
                         </Descriptions>
