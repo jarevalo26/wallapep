@@ -1,11 +1,25 @@
 import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
-import { Card, Col, Row, Typography, Divider, Input, Select, Button, Tag } from 'antd';
-import { SearchOutlined, CloseOutlined } from '@ant-design/icons';
+import { Card, Col, Row, Typography, Divider, Input, Select, Button, Tag, Spin } from 'antd';
+import { SearchOutlined, CloseOutlined, LoadingOutlined } from '@ant-design/icons';
 import { CATEGORIES } from "../../api/categories";
 
 const { Title, Paragraph, Text } = Typography;
 const { Option } = Select;
+
+// Función centralizada para iconos - Pauta 2.2
+const getCategoryIcon = (categoryId) => {
+  const icons = {
+    'celulares': '📱',
+    'computadores': '💻',
+    'televisores': '📺',
+    'consolas': '🎮',
+    'deportes': '⚽',
+    'accesorios': '🎧',
+    'audio': '🔊'
+  };
+  return icons[categoryId] || '📦';
+};
 
 const ListProductsComponent = ({ 
   showCategoryCards = false,
@@ -139,9 +153,9 @@ const ListProductsComponent = ({
 
   return (
     <div>
-      {/* ============================================ */}
-      {/* BUSCADOR - Filtros */}
-      {/* ============================================ */}
+      {/* ================================================== */}
+      {/* BUSCADOR - Filtros - Pauta 1.1 (espacio en blanco) */}
+      {/* ================================================== */}
       <Card style={{ marginBottom: 30, boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
         <Title level={4} style={{ marginBottom: 20 }}>
           🔍 Encuentra tu producto
@@ -160,7 +174,7 @@ const ListProductsComponent = ({
                 searchTerm && (
                   <CloseOutlined 
                     onClick={() => setSearchTerm("")}
-                    style={{ cursor: 'pointer', color: '#999' }}
+                    style={{ cursor: 'pointer', /*color: '#999'*/ color: 'rgba(0, 0, 0, 0.45)' }}
                   />
                 )
               }
@@ -216,9 +230,17 @@ const ListProductsComponent = ({
           </Col>
         </Row>
 
-        {/* Chips de filtros activos */}
+        {/* Chips de filtros activos - Pauta 4.18 */}
         {hasActiveFilters && (
-          <div style={{ marginTop: 20, display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
+          <div style={{ 
+            marginTop: 20, 
+            paddingTop: 16,
+            borderTop: '1px solid #f0f0f0',
+            display: 'flex', 
+            flexWrap: 'wrap', 
+            gap: 8, 
+            alignItems: 'center' 
+          }}>
             <Text type="secondary" style={{ fontSize: 14 }}>Filtros activos:</Text>
             
             {searchTerm && (
@@ -245,7 +267,7 @@ const ListProductsComponent = ({
               <Tag 
                 closable 
                 onClose={() => setMinPrice("")}
-                color="blue"
+                color="green"
               >
                 Desde: €{minPrice}
               </Tag>
@@ -255,7 +277,7 @@ const ListProductsComponent = ({
               <Tag 
                 closable 
                 onClose={() => setMaxPrice("")}
-                color="blue"
+                color="green"
               >
                 Hasta: €{maxPrice}
               </Tag>
@@ -265,7 +287,7 @@ const ListProductsComponent = ({
               type="link" 
               size="small"
               onClick={clearAllFilters}
-              style={{ padding: 0 }}
+              style={{ marginLeft: 8 }}
             >
               Limpiar todos
             </Button>
@@ -274,20 +296,20 @@ const ListProductsComponent = ({
       </Card>
 
       {/* ============================================ */}
-      {/* CATEGORÍAS - Navegación visual (opcional) */}
+      {/* CATEGORÍAS - Pauta 1.8  */}
       {/* ============================================ */}
       {showCategoryCards && (
-        <div style={{ marginBottom: 30 }}>
-          <Title level={4} style={{ marginBottom: 16 }}>
+        <div style={{ marginBottom: 32 }}>
+          <Title level={4} style={{ marginBottom: 24, fontSize: 20 }}>
             Explora por categorías
           </Title>
-          <Row gutter={[16, 16]}>
+          <Row gutter={[24, 24]}>
             {CATEGORIES.map((category) => {
               const productCount = getProductCountByCategory(category.id);
               const isSelected = selectedCategory === category.id;
 
               return (
-                <Col xs={12} sm={8} md={6} lg={6} xl={3} key={category.id}>
+                <Col xs={12} sm={8} md={6} lg={4} xl={4} key={category.id}>
                   <Card 
                     hoverable
                     onClick={() => handleCategoryClick(category.id)}
@@ -296,23 +318,24 @@ const ListProductsComponent = ({
                       cursor: 'pointer',
                       border: isSelected ? '2px solid #1890ff' : '1px solid #d9d9d9',
                       backgroundColor: isSelected ? '#e6f7ff' : 'white',
-                      transition: 'all 0.3s'
+                      transition: 'all 0.3s',
+                      borderRadius: 8,
+                      minWidth: 160
                     }}
-                    styles={{ body: { padding: '16px 8px' } }}
+                    styles={{ body: { padding: 24 } }}
                   >
-                    <div style={{ fontSize: 32, marginBottom: 8 }}>
-                      {category.id === 'celulares' && '📱'}
-                      {category.id === 'computadores' && '💻'}
-                      {category.id === 'televisores' && '📺'}
-                      {category.id === 'consolas' && '🎮'}
-                      {category.id === 'deportes' && '⚽'}
-                      {category.id === 'accesorios' && '🎧'}
-                      {category.id === 'audio' && '🔊'}
+                    <div style={{ fontSize: 40, marginBottom: 12 }}>
+                      {getCategoryIcon(category.id)}
                     </div>
-                    <Text strong style={{ fontSize: 14, display: 'block', marginBottom: 4 }}>
+                    <Text strong style={{ 
+                      fontSize: 14, 
+                      display: 'block', 
+                      marginBottom: 8,
+                      minHeight: 20 
+                    }}>
                       {category.name}
                     </Text>
-                    <Text type="secondary" style={{ fontSize: 12 }}>
+                    <Text type="secondary" style={{ fontSize: 13 }}>
                       {productCount} {productCount === 1 ? 'producto' : 'productos'}
                     </Text>
                   </Card>
@@ -329,25 +352,37 @@ const ListProductsComponent = ({
       {/* RESULTADOS - Productos filtrados */}
       {/* ============================================ */}
       
-      {/* Título de sección (opcional) */}
-      {showTitle && <h2>Productos</h2>}
+      {/* Título de sección */}
+      {showTitle && (
+        <Title level={2} style={{ marginBottom: 24, fontSize: 28 }}>
+          Productos
+        </Title>
+      )}
 
-      {/* Contador de productos encontrados */}
-      <div style={{ marginBottom: 20 }}>
-        <Text strong style={{ fontSize: 16 }}>
+      {/* Contador de productos - Pauta 3.16 */}
+      <div style={{ marginBottom: 24 }}>
+        <Text strong style={{ fontSize: 18 }}>
           {filteredProducts.length}
         </Text>
-        <Text style={{ marginLeft: 8, color: '#666' }}>
+        <Text style={{ marginLeft: 8, color: 'rgba(0, 0, 0, 0.65)', fontSize: 16  }}>
           {filteredProducts.length === 1 ? 'producto encontrado' : 'productos encontrados'}
         </Text>
       </div>
 
-      {/* Estado vacío (0 resultados) */}
+      {/* Estado vacío - Pauta 3.17 */}
       {filteredProducts.length === 0 && !loading && (
-        <Card style={{ textAlign: 'center', padding: '40px 20px' }}>
+        <Card style={{ 
+          textAlign: 'center',  
+          padding: '64px 24px',
+          borderRadius: 8
+        }}>
           <div style={{ fontSize: 64, marginBottom: 16 }}>🔍</div>
-          <Title level={3}>No se encontraron productos</Title>
-          <Paragraph style={{ color: '#666', marginBottom: 24 }}>
+          <Title level={3} style={{ fontSize: 24 }}>No se encontraron productos</Title>
+          <Paragraph style={{ 
+            color: 'rgba(0, 0, 0, 0.65)', 
+            marginBottom: 32,
+            fontSize: 16
+          }}>
             Intenta ajustar tus filtros o buscar con otros términos
           </Paragraph>
           <Button type="primary" size="large" onClick={clearAllFilters}>
@@ -356,42 +391,80 @@ const ListProductsComponent = ({
         </Card>
       )}
 
-      {/* Grid de productos filtrados */}
+      {/* Grid de productos - Modo ALL*/}
       {filteredProducts.length > 0 && displayMode === "all" && (
-        <Row gutter={[16, 16]}>
+        <Row gutter={[24, 24]}>
           {filteredProducts.map((product) => (
             <Col xs={24} sm={12} md={8} lg={6} key={product.id}>
               <Link href={`/detailProduct/${product.id}`}>
                 <Card
                   hoverable
                   cover={
-                    <img
-                      alt={product.title}
-                      src={product.image}
-                      style={{ height: 200, objectFit: 'cover' }}
-                    />
+                    <div style={{ 
+                      height: 180, 
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}>
+                      <img
+                        alt={product.title}
+                        src={product.image}
+                        style={{ 
+                          paddingTop: 16,
+                          maxHeight: '100%',
+                          maxWidth: '100%',
+                          objectFit: 'contain'
+                        }}
+                      />
+                    </div>
                   }
+                  style={{ borderRadius: 8, overflow: 'hidden' }}
                 >
-                  <Card.Meta
-                    title={<span style={{ fontSize: 14 }}>{product.title}</span>}
-                    description={
-                      <div>
-                        <Paragraph ellipsis={{ rows: 2 }} style={{ fontSize: 13, marginBottom: 8 }}>
-                          {product.description}
-                        </Paragraph>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 }}>
-                          <Text strong style={{ color: '#1890ff', fontSize: 16 }}>
-                            €{product.price}
-                          </Text>
-                          {product.category && (
-                            <Tag color="blue" style={{ fontSize: 11 }}>
-                              {getCategoryName(product.category)}
-                            </Tag>
-                          )}
-                        </div>
-                      </div>
-                    }
-                  />
+                  {/* Título - Pauta 1.6 (textos clave destacados) */}
+                  <Title level={5} style={{ 
+                    fontSize: 16, 
+                    marginBottom: 12,
+                    minHeight: 44,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    display: '-webkit-box',
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: 'vertical'
+                  }}>
+                    {product.title}
+                  </Title>
+
+                  {/* Descripción - Pauta 1.3 (textos cortos) */}
+                  <Paragraph ellipsis={{ rows: 2 }} style={{ 
+                    fontSize: 14, 
+                    marginBottom: 16,
+                    color: 'rgba(0, 0, 0, 0.65)',
+                    minHeight: 44
+                  }}>
+                    {product.description}
+                  </Paragraph>
+
+                  {/* Precio y categoría - Pauta 1.9 (tarea principal) */}
+                  <div style={{ 
+                    display: 'flex', 
+                    justifyContent: 'space-between', 
+                    alignItems: 'center',
+                    paddingTop: 12,
+                    borderTop: '1px solid #f0f0f0'
+                  }}>
+                    <Text strong style={{ 
+                      color: '#1890ff', 
+                      fontSize: 20,
+                      fontWeight: 700
+                    }}>
+                      €{product.price}
+                    </Text>
+                    {product.category && (
+                      <Tag color="blue">
+                        {getCategoryIcon(product.category)} {getCategoryName(product.category)}
+                      </Tag>
+                    )}
+                  </div>
                 </Card>
               </Link>
             </Col>
@@ -410,26 +483,24 @@ const ListProductsComponent = ({
             if (categoryProducts.length === 0) return null;
 
             return (
-              <div key={category.id} style={{ marginBottom: 40 }}>
+              <div key={category.id} style={{ marginBottom: 48 }}>
                 {/* Título de categoría con icono y contador */}
                 <div style={{ 
                   display: 'flex', 
                   justifyContent: 'space-between', 
                   alignItems: 'center',
-                  marginBottom: 20 
+                  marginBottom: 24 
                 }}>
-                  <Title level={3} style={{ margin: 0 }}>
+                  <Title level={3} style={{ margin: 0, fontSize: 24 }}>
                     <span style={{ fontSize: 32, marginRight: 12 }}>
-                      {category.id === 'celulares' && '📱'}
-                      {category.id === 'computadores' && '💻'}
-                      {category.id === 'televisores' && '📺'}
-                      {category.id === 'consolas' && '🎮'}
-                      {category.id === 'deportes' && '⚽'}
-                      {category.id === 'accesorios' && '🎧'}
-                      {category.id === 'audio' && '🔊'}
+                      {getCategoryIcon(category.id)}
                     </span>
                     {category.name}
-                    <Text type="secondary" style={{ fontSize: 16, marginLeft: 12, fontWeight: 'normal' }}>
+                    <Text type="secondary" style={{ 
+                      fontSize: 16, 
+                      marginLeft: 12, 
+                      fontWeight: 'normal' 
+                    }}>
                       ({totalInCategory} {totalInCategory === 1 ? 'producto' : 'productos'})
                     </Text>
                   </Title>
@@ -445,41 +516,80 @@ const ListProductsComponent = ({
                 </div>
 
                 {/* Grid de productos de esta categoría */}
-                <Row gutter={[16, 16]}>
+                <Row gutter={[24, 24]}>
                   {categoryProducts.map((product) => (
                     <Col xs={24} sm={12} md={8} lg={6} key={product.id}>
                       <Link href={`/detailProduct/${product.id}`}>
                         <Card
                           hoverable
                           cover={
-                            <img
-                              alt={product.title}
-                              src={product.image}
-                              style={{ height: 200, objectFit: 'cover' }}
-                            />
+                            <div style={{ 
+                              height: 180, 
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center'
+                            }}>
+                              <img
+                                alt={product.title}
+                                src={product.image}
+                                style={{ 
+                                  paddingTop: 16,
+                                  maxHeight: '100%',
+                                  maxWidth: '100%',
+                                  objectFit: 'contain'
+                                }}
+                              />
+                            </div>
                           }
+                          style={{ borderRadius: 8, overflow: 'hidden' }}
                         >
-                          <Card.Meta
-                            title={<span style={{ fontSize: 14 }}>{product.title}</span>}
-                            description={
-                              <div>
-                                <Paragraph ellipsis={{ rows: 2 }} style={{ fontSize: 13, marginBottom: 8 }}>
-                                  {product.description}
-                                </Paragraph>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 8 }}>
-                                  <Text strong style={{ color: '#1890ff', fontSize: 16 }}>
-                                    €{product.price}
-                                  </Text>
-                                </div>
-                              </div>
-                            }
-                          />
+                          <Title level={5} style={{ 
+                            fontSize: 16, 
+                            marginBottom: 12,
+                            minHeight: 44,
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            display: '-webkit-box',
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: 'vertical'
+                          }}>
+                            {product.title}
+                          </Title>
+                          
+                          <Paragraph ellipsis={{ rows: 2 }} style={{ 
+                            fontSize: 14, 
+                            marginBottom: 16,
+                            color: 'rgba(0, 0, 0, 0.65)',
+                            minHeight: 44
+                          }}>
+                            {product.description}
+                          </Paragraph>
+
+                          <div style={{ 
+                            display: 'flex', 
+                            justifyContent: 'space-between', 
+                            alignItems: 'center',
+                            paddingTop: 12,
+                            borderTop: '1px solid #f0f0f0'
+                          }}>
+                            <Text strong style={{ 
+                              color: '#1890ff', 
+                              fontSize: 20,
+                              fontWeight: 700
+                            }}>
+                              €{product.price}
+                            </Text>
+                            {product.category && (
+                              <Tag color="blue">
+                                {getCategoryIcon(product.category)} {getCategoryName(product.category)}
+                              </Tag>
+                            )}
+                          </div>
                         </Card>
                       </Link>
                     </Col>
                   ))}
                 </Row>
-
                 <Divider />
               </div>
             );
@@ -487,10 +597,23 @@ const ListProductsComponent = ({
         </div>
       )}
 
-      {/* Loading state */}
+      {/* Loading state - Pauta 5.2 */}
       {loading && (
-        <div style={{ textAlign: 'center', padding: 40 }}>
-          <Title level={4}>Cargando productos...</Title>
+        <div style={{ 
+          textAlign: 'center', 
+          padding: '80px 24px',
+          minHeight: '50vh'
+        }}>
+          <Spin 
+            indicator={<LoadingOutlined style={{ fontSize: 48 }} spin />}
+            size="large"
+          />
+          <Title level={4} style={{ 
+            marginTop: 24,
+            color: 'rgba(0, 0, 0, 0.45)'
+          }}>
+            Cargando productos...
+          </Title>
         </div>
       )}
     </div>

@@ -1,12 +1,43 @@
 import { useState, useEffect } from "react";
-import { Typography, Card, Descriptions, Image, Row, Col, Tag, Divider, Button } from 'antd';
+import { Typography, Card, Descriptions, Image, Row, Col, Tag, Divider, Spin, Button } from 'antd';
+import { LoadingOutlined, UserOutlined, ArrowLeftOutlined } from '@ant-design/icons';
+import { useRouter } from 'next/router';
 import BuyButton from './BuyButton'; 
-import { UserOutlined } from '@ant-design/icons'; 
 import Link from 'next/link';
 
 const { Title, Text } = Typography;
 
+// Iconos y nombres centralizados
+const getCategoryIcon = (categoryId) => {
+    const icons = {
+        'celulares': '📱',
+        'computadores': '💻',
+        'televisores': '📺',
+        'consolas': '🎮',
+        'videojuegos': '🎮',
+        'deportes': '⚽',
+        'accesorios': '🎧',
+        'audio': '🔊'
+    };
+    return icons[categoryId] || '📦';
+};
+
+const getCategoryName = (categoryId) => {
+    const categories = {
+        'celulares': 'Celulares',
+        'computadores': 'Computadores',
+        'televisores': 'Televisores',
+        'videojuegos': 'Videojuegos',
+        'consolas': 'Consolas',
+        'deportes': 'Deportes',
+        'accesorios': 'Accesorios',
+        'audio': 'Audio'
+    };
+    return categories[categoryId] || categoryId;
+};
+
 let DetailsProductComponent = ({ id }) => {
+    const router = useRouter();
     const [product, setProduct] = useState({});
     const [loading, setLoading] = useState(true);
     const [currentUserId, setCurrentUserId] = useState(null);
@@ -16,10 +47,8 @@ let DetailsProductComponent = ({ id }) => {
         getCurrentUserId();
     }, []);
 
-    // Obtener el ID del usuario actual
     const getCurrentUserId = () => {
         try {
-            // Obtener del localStorage (guardado en el login)
             const userId = localStorage.getItem('userId');
             if (userId) {
                 setCurrentUserId(parseInt(userId));
@@ -32,7 +61,6 @@ let DetailsProductComponent = ({ id }) => {
         }
     };
 
-    // Obtener producto del backend
     const getProduct = async (id) => {
         setLoading(true);
         try {
@@ -49,7 +77,6 @@ let DetailsProductComponent = ({ id }) => {
             if (response.ok) {
                 let jsonData = await response.json();
                 
-                // Verificar si la imagen existe
                 const imageUrl = process.env.NEXT_PUBLIC_BACKEND_BASE_URL + "/images/" + jsonData.id + ".png";
                 const imageExists = await checkImageExists(imageUrl);
                 
@@ -59,7 +86,7 @@ let DetailsProductComponent = ({ id }) => {
                 let responseBody = await response.json();
                 let serverErrors = responseBody.errors;
                 serverErrors?.forEach(e => {
-                    console.log("Error: " + e.msg);
+                    console.error("Error: " + e.msg);
                 });
             }
         } catch (error) {
@@ -69,7 +96,6 @@ let DetailsProductComponent = ({ id }) => {
         }
     };
 
-    // Verificar si la imagen existe
     const checkImageExists = async (url) => {
         try {
             const response = await fetch(url);
@@ -79,112 +105,166 @@ let DetailsProductComponent = ({ id }) => {
         }
     };
 
-    // Callback después de compra exitosa
     const handlePurchaseSuccess = (transaction) => {
-        // Refrescar el producto para mostrar que está vendido
         getProduct(id);
     };
 
-    // Obtener el nombre de la categoría
-    const getCategoryName = (categoryId) => {
-        const categories = {
-            'celulares': 'Celulares',
-            'computadores': 'Computadores',
-            'televisores': 'Televisores',
-            'videojuegos': 'Videojuegos',
-            'deportes': 'Deportes',
-            'accesorios': 'Accesorios',
-            'audio': 'Audio'
-        };
-        return categories[categoryId] || categoryId;
-    };
-
+    // Loading - Pauta 5.2
     if (loading) {
         return (
-            <Card loading={true}>
-                <Descriptions title="Cargando producto..." />
-            </Card>
+            <div style={{ textAlign: 'center', padding: '80px 24px', minHeight: '60vh' }}>
+                <Spin 
+                    indicator={<LoadingOutlined style={{ fontSize: 48 }} spin />}
+                    size="large"
+                />
+                <Title level={4} style={{ marginTop: 24, color: 'rgba(0, 0, 0, 0.45)' }}>
+                    Cargando producto...
+                </Title>
+            </div>
         );
     }
 
     return (
-        <Card>
-            <Row gutter={[24, 24]}>
-                {/* Columna de la imagen */}
-                <Col xs={24} md={12}>
-                    <Image 
-                        src={product.image || "/imageMockup.png"} 
-                        alt={product.title}
-                        style={{ width: '100%', maxHeight: 500, objectFit: 'cover' }}
-                    />
-                </Col>
+        <div style={{ padding: '24px', maxWidth: 1200, margin: '0 auto' }}>
+            {/* Botón volver - Pauta 3.18 */}
+            <Button 
+                icon={<ArrowLeftOutlined />}
+                onClick={() => router.back()}
+                style={{ marginBottom: 16 }}
+            >
+                Volver
+            </Button>
+            <Card style={{ borderRadius: 8 }}>
+                <Row gutter={[32, 32]}>
+                    {/* Columna de la imagen */}
+                    <Col xs={24} md={12}>
+                        <div style={{
+                            background: '#f5f5f5',
+                            borderRadius: 8,
+                            padding: 16,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            minHeight: 400
+                        }}>
+                            <Image 
+                                src={product.image || "/imageMockup.png"} 
+                                alt={product.title}
+                                style={{ 
+                                    width: '100%',
+                                    maxHeight: 500,
+                                    objectFit: 'contain'
+                                }}
+                            />
+                        </div>
+                    </Col>
 
-                {/* Columna de la información */}
-                <Col xs={24} md={12}>
-                    <div>
-                        {/* Título */}
-                        <Title level={2} style={{ marginBottom: 8 }}>
-                            {product.title}
-                        </Title>
+                    {/* Columna de la información */}
+                    <Col xs={24} md={12}>
+                        <div>
+                            {/* Estado del producto - Pauta 2.7 */}
+                            {product.buyerId && (
+                                <Tag color="red" style={{ 
+                                    marginBottom: 16, 
+                                    fontSize: 14, 
+                                    padding: '6px 16px',
+                                    fontWeight: 600
+                                }}>
+                                    🔒 VENDIDO
+                                </Tag>
+                            )}
 
-                        {/* Precio */}
-                        <Title level={3} style={{ color: '#1890ff', marginBottom: 16 }}>
-                            €{product.price}
-                        </Title>
+                            {!product.buyerId && product.price < 100 && (
+                                <Tag color="green" style={{ 
+                                    marginBottom: 16, 
+                                    fontSize: 14, 
+                                    padding: '6px 16px',
+                                    fontWeight: 600
+                                }}>
+                                    🔥 ¡OFERTA!
+                                </Tag>
+                            )}
 
-                        {/* Estado del producto */}
-                        {product.buyerId && (
-                            <Tag color="red" style={{ marginBottom: 16, fontSize: 14, padding: '4px 12px' }}>
-                                VENDIDO
-                            </Tag>
-                        )}
+                            {/* Título - Pauta 1.6 */}
+                            <Title level={2} style={{ 
+                                marginBottom: 16,
+                                fontSize: 32,
+                                fontWeight: 700
+                            }}>
+                                {product.title}
+                            </Title>
 
-                        {!product.buyerId && product.price < 100 && (
-                            <Tag color="green" style={{ marginBottom: 16, fontSize: 14, padding: '4px 12px' }}>
-                                ¡OFERTA!
-                            </Tag>
-                        )}
+                            {/* Precio destacado - Pauta 1.9 */}
+                            <div style={{
+                                background: '#f0f7ff',
+                                padding: '16px 24px',
+                                borderRadius: 8,
+                                marginBottom: 24
+                            }}>
+                                <Text type="secondary" style={{ fontSize: 14, display: 'block', marginBottom: 4 }}>
+                                    Precio
+                                </Text>
+                                <Title level={1} style={{ 
+                                    color: '#1890ff', 
+                                    margin: 0,
+                                    fontSize: 42,
+                                    fontWeight: 700
+                                }}>
+                                    €{product.price}
+                                </Title>
+                            </div>
 
-                        <Divider />
+                            <Divider />
 
-                        {/* Descripción */}
-                        <Descriptions column={1} size="small">
-                            <Descriptions.Item label="Descripción">
-                                <Text>{product.description || 'Sin descripción'}</Text>
-                            </Descriptions.Item>
+                            {/* Información del producto - Pauta 3.10 */}
+                            <Descriptions column={1} size="middle" labelStyle={{ fontWeight: 600 }}>
+                                <Descriptions.Item label="Descripción">
+                                    <Text style={{ fontSize: 15, lineHeight: 1.6 }}>
+                                        {product.description || 'Sin descripción'}
+                                    </Text>
+                                </Descriptions.Item>
 
-                            <Descriptions.Item label="Categoría">
-                                <Tag color="blue">{getCategoryName(product.category)}</Tag>
-                            </Descriptions.Item>
+                                <Descriptions.Item label="Categoría">
+                                    <Tag color="blue" style={{ fontSize: 14, padding: '4px 12px' }}>
+                                        {getCategoryIcon(product.category)} {getCategoryName(product.category)}
+                                    </Tag>
+                                </Descriptions.Item>
 
-                            <Descriptions.Item label="ID del producto">
-                                <Text type="secondary">#{product.id}</Text>
-                            </Descriptions.Item>
+                                <Descriptions.Item label="ID del producto">
+                                    <Text type="secondary">#{product.id}</Text>
+                                </Descriptions.Item>
 
-                            {product.sellerId && (
+                                {product.sellerId && (
                                 <Descriptions.Item label="Vendedor">
-                                    {/* <Text>Usuario #{product.sellerId}</Text> */}
                                     <Link href={`/profile/${product.sellerId}`}>
-                                        <Button type="link" icon={<UserOutlined />}>
+                                        <span style={{ 
+                                            display: 'inline-flex', 
+                                            alignItems: 'center', 
+                                            gap: 8,
+                                            color: '#1890ff',
+                                            cursor: 'pointer'
+                                        }}>
+                                            <UserOutlined />
                                             Usuario #{product.sellerId}
-                                        </Button>
+                                        </span>
                                     </Link>
                                 </Descriptions.Item>
                             )}
-                        </Descriptions>
+                            </Descriptions>
 
-                        <Divider />
+                            <Divider />
 
-                        {/* Botón de compra */}
-                        <BuyButton
-                            product={product}
-                            currentUserId={currentUserId}
-                            onSuccess={handlePurchaseSuccess}
-                        />
-                    </div>
-                </Col>
-            </Row>
-        </Card>
+                            {/* Botón de compra - Pauta 1.9 */}
+                            <BuyButton
+                                product={product}
+                                currentUserId={currentUserId}
+                                onSuccess={handlePurchaseSuccess}
+                            />
+                        </div>
+                    </Col>
+                </Row>
+            </Card>
+        </div>
     );
 };
 

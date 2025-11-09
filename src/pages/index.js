@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Typography } from 'antd';
+import { Typography, Spin } from 'antd';
+import { LoadingOutlined } from '@ant-design/icons';
 import ListCategoriesOnlyComponent from '../pages/components/products/ListCategoriesOnlyComponent';
 import ListProductsComponent from '../pages/components/products/ListProductsComponent';
 
@@ -70,12 +71,29 @@ export default function Home() {
 
   return (
     <div>
-      {/* Sección de bienvenida (siempre visible) */}
-      <div style={{ textAlign: 'center', marginBottom: 40, padding: '20px 0' }}>
-        <Title level={1} style={{ marginBottom: 16 }}>
+      {/* Sección de bienvenida - Pauta 1.1 (espacio en blanco), 1.6 (jerarquía) */}
+      <div style={{ 
+        textAlign: 'center', 
+        marginBottom: 48,
+        padding: '32px 24px'
+      }}>
+        <Title 
+          level={1} 
+          style={{ 
+            marginBottom: 16,
+            fontSize: 42,
+            fontWeight: 700
+          }}
+        >
           Bienvenido a Wallapep
         </Title>
-        <Paragraph style={{ fontSize: 16, maxWidth: 600, margin: '0 auto', color: '#666' }}>
+        <Paragraph style={{ 
+          fontSize: 18, 
+          maxWidth: 600, 
+          margin: '0 auto',
+          color: 'rgba(0, 0, 0, 0.65)',
+          lineHeight: 1.6
+        }}>
           Compra y vende productos de segunda mano. 
           Encuentra ofertas increíbles o vende lo que ya no uses.
         </Paragraph>
@@ -83,8 +101,24 @@ export default function Home() {
 
       {/* Contenido condicional según login */}
       {loading ? (
-        <div style={{ textAlign: 'center', padding: 40 }}>
-          <Title level={4}>Cargando...</Title>
+        <div style={{ 
+          textAlign: 'center', 
+          padding: '64px 24px',
+          minHeight: '40vh'
+        }}>
+          <Spin 
+            indicator={<LoadingOutlined style={{ fontSize: 48 }} spin />}
+            size="large"
+          />
+          <Title 
+            level={4} 
+            style={{ 
+              marginTop: 24,
+              color: 'rgba(0, 0, 0, 0.45)'
+            }}
+          >
+            Cargando...
+          </Title>
         </div>
       ) : !isLoggedIn ? (
         <ListCategoriesOnlyComponent productCounts={productCounts} />

@@ -1,11 +1,27 @@
 import { useState } from "react";
 import { modifyStateProperty } from "../../../utils/UtilsState";
-import { Card, Input, Button, Row, Col, Form, Upload, Select } from "antd";
+import { Card, Input, Button, Row, Col, Form, Upload, Select, Typography } from "antd";
+import { DollarOutlined, FileTextOutlined, TagOutlined, PictureOutlined } from '@ant-design/icons';
 import { CATEGORIES } from "@/pages/api/categories";
 
-let CreateProductComponent = ({ openNotification }) => {
+const { Title, Text } = Typography;
 
+const getCategoryIcon = (categoryId) => {
+  const icons = {
+    'celulares': '📱',
+    'computadores': '💻',
+    'televisores': '📺',
+    'consolas': '🎮',
+    'deportes': '⚽',
+    'accesorios': '🎧',
+    'audio': '🔊'
+  };
+  return icons[categoryId] || '📦';
+};
+
+let CreateProductComponent = ({ openNotification }) => {
     const [form] = Form.useForm();
+    const [loading, setLoading] = useState(false);
     const initialFormData = {
         title: "",
         description: "",
@@ -31,6 +47,8 @@ let CreateProductComponent = ({ openNotification }) => {
             }
             return;
         }
+
+        setLoading(true);
 
         let response = await fetch(
             process.env.NEXT_PUBLIC_BACKEND_BASE_URL + "/products", {
@@ -69,6 +87,7 @@ let CreateProductComponent = ({ openNotification }) => {
                 openNotification("top", "Error al crear producto", "error")
             }
         }
+        setLoading(false);
     }
 
     let uploadImage = async (productId) => {
@@ -86,7 +105,6 @@ let CreateProductComponent = ({ openNotification }) => {
         })
         if (response.ok) {
             let data = await response.json()
-            console.log("Image uploaded", data)
             return true
         } else {
             let responseBody = await response.json();
@@ -99,34 +117,59 @@ let CreateProductComponent = ({ openNotification }) => {
     }
 
     return (
-        <Row align="middle" justify="center" style={{ minHeight: "70vh" }}>
-            <Col>
-                <Card title="Create product" style={{ width: "500px" }}>
+        <Row align="middle" justify="center" style={{ minHeight: "70vh", padding: "24px 0" }}>
+            <Col xs={24} sm={22} md={20} lg={16} xl={12}>
+                <Card style={{ borderRadius: 8 }}>
+                    {/* Título - Pauta 1.6 */}
+                    <div style={{ textAlign: 'center', marginBottom: 32 }}>
+                        <Title level={2} style={{ marginBottom: 8, fontSize: 28 }}>
+                            Vender producto
+                        </Title>
+                        <Text type="secondary" style={{ fontSize: 16 }}>
+                            Completa la información de tu producto
+                        </Text>
+                    </div>
+
                     <Form form={form} layout="vertical">
-                        <Form.Item name="title">
+                        {/* Título del producto - Pauta 4.3 */}
+                        <Form.Item 
+                            name="title"
+                            label={<Text strong>Título del producto</Text>}
+                            rules={[{ required: true, message: "El título es obligatorio" }]}
+                        >
                             <Input
                                 value={formData.title}
-                                onChange={
-                                    (i) => modifyStateProperty(
-                                        formData, setFormData, "title", i.currentTarget.value)}
+                                onChange={(i) => modifyStateProperty(
+                                    formData, setFormData, "title", i.currentTarget.value)}
                                 size="large" 
-                                type="text" 
-                                placeholder="product title"></Input>
+                                prefix={<TagOutlined style={{ color: 'rgba(0,0,0,.25)' }} />}
+                                placeholder="Ej: iPhone 17 Pro Max"
+                            />
                         </Form.Item>
-
-                        <Form.Item name="description">
-                            <Input
+                        
+                        {/* Descripción - Pauta 4.3 */}
+                        <Form.Item 
+                            name="description"
+                            label={<Text strong>Descripción</Text>}
+                            rules={[{ required: true, message: "La descripción es obligatoria" }]}
+                        >
+                            <Input.TextArea
                                 value={formData.description} 
                                 onChange={
                                     (i) => modifyStateProperty(
                                         formData, setFormData, "description", i.currentTarget.value)}
-                                size="large" 
-                                type="text" 
-                                placeholder="
-                                description"></Input>
+                                size="large"
+                                rows={4}
+                                placeholder="Describe el estado, características y detalles importantes" 
+                            />
                         </Form.Item>
 
-                        <Form.Item name="price">
+                        {/* Precio - Pauta 4.11 */}
+                        <Form.Item 
+                            name="price"
+                            label={<Text strong>Precio (€)</Text>}
+                            rules={[{ required: true, message: "El precio es obligatorio" }]}
+                        >
                             <Input 
                                 value={formData.price}
                                 onChange={
@@ -134,10 +177,37 @@ let CreateProductComponent = ({ openNotification }) => {
                                         formData, setFormData, "price", i.currentTarget.value)}
                                 size="large" 
                                 type="number" 
-                                placeholder="price"></Input>
+                                prefix={<DollarOutlined style={{ color: 'rgba(0,0,0,.25)' }} />}
+                                placeholder="0.00"
+                                min={0}
+                            />
                         </Form.Item>
 
-                        <Form.Item name="image">
+                        {/* Categoría - Pauta 4.3 */}                        
+                        <Form.Item 
+                            name="category"
+                            label={<Text strong>Categoría</Text>}
+                            rules={[{ required: true, message: "Selecciona una categoría" }]}
+                        >
+                            <Select
+                                size="large"
+                                placeholder="Selecciona una categoría"
+                                value={formData.category}
+                                onChange={(val) => modifyStateProperty(formData, setFormData, "category", val)}
+                            >
+                                {CATEGORIES.map((c) => (
+                                    <Select.Option key={c.id} value={c.id}>
+                                        {c.name}
+                                    </Select.Option>
+                                ))}
+                            </Select>
+                        </Form.Item>
+                        
+                        {/* Imagen - Pauta 4.5 */}
+                        <Form.Item 
+                            name="image"
+                            label={<Text strong>Imagen del producto</Text>}
+                        >
                             <Upload
                                 listType="picture-card"
                                 maxCount={1}
@@ -160,28 +230,29 @@ let CreateProductComponent = ({ openNotification }) => {
                                     originFileObj: formData.image
                                 }] : []}
                             >
-                                {formData.image ? null : "Upload"}
+                                {formData.image ? null : (
+                                    <div>
+                                        <PictureOutlined style={{ fontSize: 24, marginBottom: 8 }} />
+                                        <div>Subir imagen</div>
+                                    </div>
+                                )}
                             </Upload>
+                            <Text type="secondary" style={{ fontSize: 13 }}>
+                                Formatos: JPG, PNG. Máximo 5MB
+                            </Text>
                         </Form.Item>
-                        
-                        <Form.Item
-                         name="category"
-                         rules={[{ required: true, message: "Selecciona una categoría" }]}
-                        >
-                            <Select
-                                placeholder="Selecciona una categoría"
-                                value={formData.category}
-                                onChange={(val) => modifyStateProperty(formData, setFormData, "category", val)}
-                            >
-                                {CATEGORIES.map((c) => (
-                                    <Select.Option key={c.id} value={c.id}>
-                                        {c.name}
-                                    </Select.Option>
-                                ))}
-                            </Select>
-                     </Form.Item>
                     </Form>
-                    <Button type="primary" onClick={clickCreateProduct} block>Sell Product</Button>
+                    {/* Botón - Pauta 1.9, 5.2 */}
+                    <Button 
+                        type="primary" 
+                        size="large"
+                        onClick={clickCreateProduct} 
+                        loading={loading}
+                        block
+                        style={{ marginTop: 16 }}
+                    >
+                        Publicar producto
+                    </Button>
                 </Card>
             </Col>
         </Row>
