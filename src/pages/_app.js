@@ -73,7 +73,7 @@ export default function App({ Component, pageProps }) {
         localStorage.removeItem("email");
         localStorage.removeItem("userId"); 
         setLogin(false)
-        router.push("/")
+        router.push("/").then(() => window.location.reload());
     }
 
   let { Header, Content, Footer } = Layout;
